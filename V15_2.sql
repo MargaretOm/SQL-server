@@ -34,3 +34,43 @@ SELECT SumTaxAmt, SumTotal FROM #Employee;
 SELECT * FROM dbo.Employee WHERE MaritalStatus = 'S';
 DELETE FROM dbo.Employee WHERE MaritalStatus = 'S';
 SELECT * FROM dbo.Employee WHERE MaritalStatus = 'S';
+
+MERGE INTO dbo.Employee AS Target
+USING dbo.#Employee
+ON Target.BusinessEntityID = #Employee.BusinessEntityID
+WHEN MATCHED THEN UPDATE SET
+    SumTotal = #Employee.SumTotal,
+    SumTaxAmt = #Employee.SumTaxAmt
+WHEN NOT MATCHED BY TARGET THEN
+    INSERT (
+		BusinessEntityID,
+        NationalIDNumber,
+        LoginID,
+        JobTitle,
+        BirthDate,
+        MaritalStatus,
+        Gender,
+        HireDate,
+        VacationHours,
+        SickLeaveHours,
+        ModifiedDate,
+        SumTotal,
+        SumTaxAmt
+    ) VALUES (
+		#Employee.BusinessEntityID,
+        #Employee.NationalIDNumber,
+        #Employee.LoginID,
+        #Employee.JobTitle,
+        #Employee.BirthDate,
+        #Employee.MaritalStatus,
+        #Employee.Gender,
+        #Employee.HireDate,
+        #Employee.VacationHours,
+        #Employee.SickLeaveHours,
+        #Employee.ModifiedDate,
+        #Employee.SumTotal,
+        #Employee.SumTaxAmt
+    )
+WHEN NOT MATCHED BY SOURCE THEN
+    DELETE;
+GO    
